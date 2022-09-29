@@ -1,31 +1,32 @@
 
-from multiprocessing.sharedctypes import Value
 from random import randint, choice
-from copy import deepcopy
 from time import sleep
 import os
 
 class Monde:
-    def __init__(self, largeur: int, hauteur: int):
+    def __init__(self, largeur, hauteur):
         self.largeur = largeur
         self.hauteur = hauteur
         self.grille = [[ "  " for _ in range(largeur)] for _ in range(hauteur)]
         self.poissons = []
+        self.requins = []
     
     def afficher_monde(self):
         """
         Fonction qui affiche le monde dans la console.
         """
-        affichee_grille = deepcopy(self.grille)
+        for ligne in self.grille:
+            for case in ligne:
+                if isinstance(case,Poisson):
+                    print("🐠", end=" | ")
+                elif isinstance(case,Requin):
+                    print("🦈", end=" | ")
+                else:
+                    print("  ", end=" | ")
+            print("\n")
 
-        for ligne_grille in affichee_grille:
-            for case_grille in ligne_grille:
-                if type(case_grille) == Poisson:
-                    ligne_grille[ligne_grille.index(case_grille)] = "🐠"
-            print(str(ligne_grille))
 
-
-    def peupler(self, nb_poisson: int, nb_requin: int):
+    def peupler(self, nb_poisson, nb_requin):
         """
         Fonction qui fait apparaître les poissons sur le monde
         : param nb_poisson (int) : Nombre de poissons à faire apparaître
@@ -48,24 +49,40 @@ class Monde:
             random_y = randint(0, self.hauteur-1)
             random_x = randint(0, self.largeur-1)
             if self.grille[random_y][random_x] == "  ":
-                self.grille[random_y][random_x] = "🦈"
+                self.grille[random_y][random_x] = Requin(random_y, random_x)
                 max_requin += 1
 
     
     def jouer_un_tour(self):
+        # Reintialiser les Listes d'entités
+        self.poissons = []
+        self.requins = []
+
+        # Ajout des Poissons dans la Liste d'entités
         for ligne in self.grille:
             for case in ligne:
                 if isinstance(case, Poisson):
                     self.poissons.append(case)
-        
+
+        # Faire vivre une journée aux Poissons
         for poisson in self.poissons:
-            print(poisson)
             poisson.vivre_une_journee(self)
 
+        # Ajout des Requins dans la Liste d'entités
+        for ligne in self.grille:
+            for case in ligne:
+                if isinstance(case, Requin):
+                    self.requins.append(case)
+
+        # Faire vivre une journée aux Poissons
+        for requin in self.requins:
+            requin.vivre_une_journee(self)
+
+        # Afficher le monde
         self.afficher_monde()
 
 class Poisson:
-    def __init__(self, y: int, x: int):
+    def __init__(self, y, x):
         self.y = y
         self.x = x
         self.reproduction = 0
@@ -93,23 +110,114 @@ class Poisson:
 
         if deplacements != []:
             choix = choice(deplacements)
-            if self.reproduction > 4:
-                monde.grille[preced_y][preced_x] = Poisson(choix[0],choix[1])
+            if self.reproduction >= 4:
+                self.y = choix[0]
+                self.x = choix[1]
+
+                monde.grille[preced_y][preced_x] = Poisson(preced_y,preced_x)
+
                 monde.grille[choix[0]][choix[1]] = self
                 self.reproduction = 0
-                return True
             else: 
+                self.y = choix[0]
+                self.x = choix[1]
+
                 monde.grille[choix[0]][choix[1]] = self
                 monde.grille[preced_y][preced_x] = "  "       
-                return True
         
     def vivre_une_journee(self, monde):
-        if self.se_deplacer(monde, self.deplacement_possible(monde)):
-            self.reproduction += 1
+        self.se_deplacer(monde, self.deplacement_possible(monde))
+        self.reproduction += 1
 
-monde = Monde(5, 5)
-monde.peupler(3, 5)
+class Requin:
+    def __init__(self, y, x):
+        self.y = y
+        self.x = x
+        self.reproduction = 0
+        self.energie = 6
+    
+    def deplacement_possible(self, monde):
+        deplacements = []
+        # Chercher les Poissons
+        if isinstance(monde.grille[(self.y+1) % monde.hauteur][self.x], Poisson):
+            deplacements.append(((self.y+1) % monde.hauteur, self.x))
+            return deplacements
+        elif isinstance(monde.grille[(self.y-1) % monde.hauteur][self.x], Poisson):
+            deplacements.append(((self.y-1) % monde.hauteur, self.x))
+            return deplacements
+        elif isinstance(monde.grille[self.y][(self.x+1) % monde.largeur], Poisson):
+            deplacements.append((self.y, (self.x+1) % monde.largeur))
+            return deplacements
+        elif isinstance(monde.grille[self.y][(self.x-1) % monde.largeur], Poisson):
+            deplacements.append((self.y, (self.x-1) % monde.largeur))
+            return deplacements
+        else:
+            if monde.grille[(self.y+1) % monde.hauteur][self.x] == "  ":
+                deplacements.append(((self.y+1) % monde.hauteur, self.x))
+            
+            if monde.grille[(self.y-1) % monde.hauteur][self.x] == "  ":
+                deplacements.append(((self.y-1) % monde.hauteur, self.x))
+            
+            if monde.grille[self.y][(self.x+1) % monde.largeur] == "  ":
+                deplacements.append((self.y, (self.x+1) % monde.largeur))
+            
+            if monde.grille[self.y][(self.x-1) % monde.largeur] == "  ":
+                deplacements.append((self.y, (self.x-1) % monde.largeur))
+
+        return deplacements
+
+    def se_deplacer(self, monde, deplacements):
+        preced_y = self.y
+        preced_x = self.x
+        if self.energie == 0:
+            monde.grille[self.y][self.x] = "  "
+        elif deplacements != []:
+            choix = choice(deplacements)
+            # Vérifie si le choix est un poisson
+            if isinstance(monde.grille[choix[0]][choix[1]], Poisson):
+                if self.reproduction >= 4:
+                    self.y = choix[0]
+                    self.x = choix[1]
+
+                    monde.grille[preced_y][preced_x] = Requin(preced_y,preced_x)
+
+                    monde.grille[choix[0]][choix[1]] = self
+                    self.reproduction = 0
+                else:
+                    self.y = choix[0]
+                    self.x = choix[1]
+
+                    monde.grille[choix[0]][choix[1]] = self
+                    monde.grille[preced_y][preced_x] = "  "
+                # Ajout d'energie si le requin mange un poisson
+                self.energie += 1
+            elif self.reproduction >= 10:
+                self.y = choix[0]
+                self.x = choix[1]
+
+                monde.grille[preced_y][preced_x] = Requin(preced_y,preced_x)
+
+                monde.grille[choix[0]][choix[1]] = self
+                self.reproduction = 0
+            else: 
+                self.y = choix[0]
+                self.x = choix[1]
+
+                monde.grille[choix[0]][choix[1]] = self
+                monde.grille[preced_y][preced_x] = "  "
+        
+    def vivre_une_journee(self, monde):
+        self.se_deplacer(monde, self.deplacement_possible(monde))
+        self.energie -= 1
+        if self.energie == 0:
+            monde.grille[self.y][self.x] = "  "
+        elif self.energie > 10:
+            self.energie = 10
+        self.reproduction += 1
+
+monde = Monde(10, 8)
+monde.peupler(10, 8)
 monde.afficher_monde()
-for _ in range(2):
-    print("------------------")
+for _ in range(150):
+    print("-------------------------------------------------")
     monde.jouer_un_tour()
