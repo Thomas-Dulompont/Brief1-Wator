@@ -1,7 +1,17 @@
-
+from tkinter import * 
 from random import randint, choice
-from time import sleep
+import time
 import os
+
+fenetre = Tk()
+
+color_water = "#000643"
+
+def lancer_simulation(duree):
+    for _ in range(duree):
+        #time.sleep(2)
+        monde.jouer_un_tour()
+        canvas.update_idletasks()
 
 class Monde:
     def __init__(self, largeur, hauteur):
@@ -17,14 +27,14 @@ class Monde:
         """
         for ligne in self.grille:
             for case in ligne:
+                x_current = self.grille.index(ligne)
+                y_current = self.grille[self.grille.index(ligne)].index(case)
                 if isinstance(case,Poisson):
-                    print("🐠", end=" | ")
+                    canvas.create_rectangle(x_current + 3, y_current + 3, x_current + 3, y_current + 3,outline="#fb0",fill="#fb0")
                 elif isinstance(case,Requin):
-                    print("🦈", end=" | ")
+                    canvas.create_rectangle(x_current + 3, y_current + 3, x_current + 3, y_current + 3,outline="#00d600",fill="#00d600")
                 else:
-                    print("  ", end=" | ")
-            print("\n")
-
+                    canvas.create_rectangle(x_current + 3, y_current + 3, x_current + 3, y_current + 3,outline=color_water,fill=color_water)
 
     def peupler(self, nb_poisson, nb_requin):
         """
@@ -215,9 +225,14 @@ class Requin:
             self.energie = 10
         self.reproduction += 1
 
-monde = Monde(10, 8)
-monde.peupler(10, 10)
-monde.afficher_monde()
-for _ in range(50):
-    print("-------------------------------------------------")
-    monde.jouer_un_tour()
+monde = Monde(500, 500)
+
+canvas = Canvas(fenetre, width=monde.largeur, height=monde.hauteur, background=color_water)
+canvas.pack()
+
+monde.peupler(100, 100)
+
+button= Button(fenetre, text="Lancer",command=lambda:lancer_simulation(10))
+button.pack()
+
+fenetre.mainloop()
