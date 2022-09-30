@@ -9,12 +9,6 @@ color_shark = "#a83234"
 tile_size = 1
 location_canvas = 1
 
-def lancer_simulation():
-        monde.jouer_un_tour()
-        canvas.update_idletasks()
-        print("Mise à jour du canvas")
-        canvas.after(200, lancer_simulation())
-
 class Monde:
     def __init__(self, largeur, hauteur):
         self.largeur = largeur
