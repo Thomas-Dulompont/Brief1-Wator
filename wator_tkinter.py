@@ -3,7 +3,9 @@ from random import randint, choice
 import time
 import os
 
-color_water = "#003dd6"
+color_water = "#121740"
+color_fish = "#5265ff"
+color_shark = "#a83234"
 tile_size = 1
 location_canvas = 1
 
@@ -32,9 +34,9 @@ class Monde:
                 x_current = self.grille.index(ligne)
                 y_current = self.grille[self.grille.index(ligne)].index(case)
                 if isinstance(case,Poisson):
-                    canvas.create_rectangle(x_current + location_canvas, y_current + location_canvas, x_current + tile_size, y_current + tile_size, outline="", fill="#fb0", tags="poisson")
+                    canvas.create_rectangle(x_current + location_canvas, y_current + location_canvas, x_current + tile_size, y_current + tile_size, outline="", fill=color_fish, tags="poisson")
                 elif isinstance(case,Requin):
-                    canvas.create_rectangle(x_current + location_canvas, y_current + location_canvas, x_current + tile_size, y_current + tile_size, outline="", fill="#00d600", tags="requin")
+                    canvas.create_rectangle(x_current + location_canvas, y_current + location_canvas, x_current + tile_size, y_current + tile_size, outline="", fill="#a83234", tags="requin")
 
     def peupler(self, nb_poisson, nb_requin):
         """
@@ -138,13 +140,13 @@ class Poisson:
         if deplacements != []:
             choix = choice(deplacements)
             if self.reproduction >= 4:
+                self.reproduction = 0
                 self.y = choix[0]
                 self.x = choix[1]
 
                 monde.grille[preced_y][preced_x] = Poisson(preced_y,preced_x)
 
                 monde.grille[choix[0]][choix[1]] = self
-                self.reproduction = 0
             else: 
                 self.y = choix[0]
                 self.x = choix[1]
@@ -221,13 +223,13 @@ class Requin:
             # Vérifie si le choix est un poisson
             if isinstance(monde.grille[choix[0]][choix[1]], Poisson):
                 if self.reproduction >= 4:
+                    self.reproduction = 0
                     self.y = choix[0]
                     self.x = choix[1]
 
                     monde.grille[preced_y][preced_x] = Requin(preced_y,preced_x)
 
                     monde.grille[choix[0]][choix[1]] = self
-                    self.reproduction = 0
                 else:
                     self.y = choix[0]
                     self.x = choix[1]
@@ -237,13 +239,13 @@ class Requin:
                 # Ajout d'energie si le requin mange un poisson
                 self.energie += 6
             elif self.reproduction >= 10:
+                self.reproduction = 0
                 self.y = choix[0]
                 self.x = choix[1]
 
                 monde.grille[preced_y][preced_x] = Requin(preced_y,preced_x)
 
                 monde.grille[choix[0]][choix[1]] = self
-                self.reproduction = 0
             else: 
                 self.y = choix[0]
                 self.x = choix[1]
@@ -264,7 +266,7 @@ class Requin:
             self.energie = 10
         self.reproduction += 1
 
-monde = Monde(300, 300)
+monde = Monde(200, 200)
 
 monde.peupler(700, 500)
 
@@ -281,4 +283,3 @@ while True:
     #time.sleep(1)
     canvas.update_idletasks()
     fenetre.update()
-    print("Mise à jour du canvas")
