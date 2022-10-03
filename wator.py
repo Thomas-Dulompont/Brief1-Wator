@@ -1,5 +1,8 @@
 
+from cmath import isinf
+from pyexpat.model import XML_CQUANT_OPT
 from random import randint, choice
+from re import X
 from time import sleep
 import os
 
@@ -53,6 +56,7 @@ class Monde:
                 max_requin += 1
 
     
+   
     def jouer_un_tour(self):
         # Reintialiser les Listes d'entités
         self.poissons = []
@@ -217,3 +221,4 @@ monde.afficher_monde()
 for _ in range(50):
     print("-------------------------------------------------")
     monde.jouer_un_tour()
+
