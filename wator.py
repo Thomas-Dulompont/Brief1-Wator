@@ -1,8 +1,5 @@
 
-from cmath import isinf
-from pyexpat.model import XML_CQUANT_OPT
 from random import randint, choice
-from re import X
 from time import sleep
 import os
 

@@ -67,7 +67,7 @@ class Monde:
         self.poissons = []
         self.requins = []
 
-        # Ajout des Poissons dans la Liste d'entités
+        # Ajout des Poissons / Requins dans la Liste d'entités
         for ligne in self.grille:
             for case in ligne:
                 if isinstance(case, Poisson):
