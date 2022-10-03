@@ -1,5 +1,6 @@
+from tkinter import * 
 from random import randint, choice
-from time import sleep
+import time
 import os
 
 class Monde:
