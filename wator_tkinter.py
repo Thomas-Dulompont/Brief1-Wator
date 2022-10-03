@@ -72,16 +72,12 @@ class Monde:
             for case in ligne:
                 if isinstance(case, Poisson):
                     self.poissons.append(case)
+                elif isinstance(case, Requin):
+                    self.requins.append(case)
 
         # Faire vivre une journée aux Poissons
         for poisson in self.poissons:
             poisson.vivre_une_journee(self)
-
-        # Ajout des Requins dans la Liste d'entités
-        for ligne in self.grille:
-            for case in ligne:
-                if isinstance(case, Requin):
-                    self.requins.append(case)
 
         # Faire vivre une journée aux Poissons
         for requin in self.requins:
