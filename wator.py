@@ -137,17 +137,15 @@ class Requin:
         # Chercher les Poissons
         if isinstance(monde.grille[(self.y+1) % monde.hauteur][self.x], Poisson):
             deplacements.append(((self.y+1) % monde.hauteur, self.x))
-            return deplacements
         elif isinstance(monde.grille[(self.y-1) % monde.hauteur][self.x], Poisson):
             deplacements.append(((self.y-1) % monde.hauteur, self.x))
-            return deplacements
         elif isinstance(monde.grille[self.y][(self.x+1) % monde.largeur], Poisson):
             deplacements.append((self.y, (self.x+1) % monde.largeur))
-            return deplacements
         elif isinstance(monde.grille[self.y][(self.x-1) % monde.largeur], Poisson):
             deplacements.append((self.y, (self.x-1) % monde.largeur))
-            return deplacements
         else:
+            if deplacements != []:
+                return deplacements
             if monde.grille[(self.y+1) % monde.hauteur][self.x] == "  ":
                 deplacements.append(((self.y+1) % monde.hauteur, self.x))
             
